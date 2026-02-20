@@ -1,0 +1,12 @@
+import express from "express";
+import { login, logout, register } from "../controller/authController.js";
+import { validateRequest } from "../middleware/validateRequest.js";
+import { loginSchema, registerSchema } from "../validators/authValidators.js";
+
+const router = express.Router();
+
+router.post("/register", validateRequest(registerSchema), register);
+router.post("/login", validateRequest(loginSchema), login);
+router.post("/logout", logout);
+
+export default router;
