@@ -1,9 +1,19 @@
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../config/db.js";
+import { User } from "../types/index.js";
 
-export const authMiddleware = async (req, res, next) => {
+interface DecodedToken {
+  id: string;
+}
+
+export const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<Response | void> => {
   console.log("auth", req?.headers?.authorization);
-  let token;
+  let token: string | undefined;
 
   if (
     req.headers.authorization &&
@@ -22,7 +32,8 @@ export const authMiddleware = async (req, res, next) => {
   }
   try {
     // verify that the token is valid and extract the user id
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "";
+    const decoded = jwt.verify(token, secret) as DecodedToken;
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
@@ -34,7 +45,7 @@ export const authMiddleware = async (req, res, next) => {
       });
     }
 
-    req.user = user;
+    req.user = user as User;
     next();
   } catch (error) {
     return res.status(401).json({

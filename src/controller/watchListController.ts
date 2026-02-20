@@ -1,7 +1,15 @@
+import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
 
-const addToWatchList = async (req, res) => {
+const addToWatchList = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   const { movieId, status, rating, notes } = req.body;
+
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   // verify movie exists
   const movie = await prisma.movie.findUnique({
@@ -47,11 +55,18 @@ const addToWatchList = async (req, res) => {
 };
 
 // Update watchlist item
-const updateWatchlistItem = async (req, res) => {
+const updateWatchlistItem = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   const { status, rating, notes } = req.body;
 
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   const watchListItem = await prisma.watchListItem.findUnique({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
   });
 
   // check if the item exists
@@ -68,13 +83,13 @@ const updateWatchlistItem = async (req, res) => {
     });
   }
 
-  const updateData = {};
+  const updateData: any = {};
   if (status !== undefined) updateData.status = status.toUpperCase();
   if (rating !== undefined) updateData.rating = rating;
   if (notes !== undefined) updateData.notes = notes;
 
   const updatedItem = await prisma.watchListItem.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: updateData,
   });
 
@@ -87,9 +102,16 @@ const updateWatchlistItem = async (req, res) => {
 };
 
 // Remove from watchlist
-const removeFromWatchList = async (req, res) => {
+const removeFromWatchList = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   const watchlistItem = await prisma.watchListItem.findUnique({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
   });
 
   if (!watchlistItem) {
@@ -105,7 +127,7 @@ const removeFromWatchList = async (req, res) => {
   }
 
   await prisma.watchListItem.delete({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
   });
 
   res.status(200).json({

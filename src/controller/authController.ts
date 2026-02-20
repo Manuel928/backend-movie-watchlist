@@ -1,9 +1,13 @@
+import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 
 // --------------- Register ---------------------
-const register = async (req, res) => {
+const register = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   const { name, email, password } = req.body;
 
   if (!email || !password || !name) {
@@ -53,7 +57,7 @@ const register = async (req, res) => {
 };
 
 // ------------------- Login --------------------------
-const login = async (req, res) => {
+const login = async (req: Request, res: Response): Promise<Response | void> => {
   const { email, password } = req.body;
 
   // Check if the user exists in the table
@@ -92,7 +96,10 @@ const login = async (req, res) => {
 };
 
 // -------------- Logout ----------------
-const logout = async (req, res) => {
+const logout = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   res.cookie("jwt", "", {
     httpOnly: true,
     expires: new Date(0),
