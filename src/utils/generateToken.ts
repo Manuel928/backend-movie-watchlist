@@ -1,9 +1,11 @@
+import { Response } from "express";
 import jwt from "jsonwebtoken";
 
-export const generateToken = (userId, res) => {
+export const generateToken = (userId: string, res: Response): string => {
   const payload = { id: userId };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  const secret = (process.env.JWT_SECRET || "fallback_secret") as jwt.Secret;
+  const token = jwt.sign(payload, secret, {
+    expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as any,
   });
 
   res.cookie("jwt", token, {
